@@ -8,19 +8,22 @@
 import Foundation
 
 /*
- CRUD Functions
- 
+ CRUD Functions: These are the functions on the viewModel
  Create
  Read
  Update
  Delete
- 
  */
 
 class ListViewModel: ObservableObject
 {
-    @Published var items: [ItemModel] = []
+    @Published var items: [ItemModel] = [] {
+        didSet {
+            saveItems()
+        }
+    }
     
+    let itemsKey = "items_list"
     init()
     {
         getItems()
@@ -28,12 +31,12 @@ class ListViewModel: ObservableObject
     
     func getItems()
     {
-        let newItems = [
-            ItemModel(title: "FirstItem", isCompleted: true),
-            ItemModel(title: "SecondItem", isCompleted: false),
-            ItemModel(title: "ThirdItem", isCompleted: true)
-        ]
-        items.append(contentsOf: newItems)
+        guard
+            let data = UserDefaults.standard.data(forKey: itemsKey),
+            let savedItems = try? JSONDecoder().decode([ItemModel].self, from: data)
+        else { return }
+        
+        self.items = savedItems
     }
     
     func deleteItem(indexSet: IndexSet)
@@ -57,5 +60,11 @@ class ListViewModel: ObservableObject
             items[index] = item.updateCompletion() // this will make a new ListModel that has the same id and title but updated isCompleted. 
         }
 
+    }
+    
+    func saveItems() {
+        if let encodedData = try? JSONEncoder().encode(items) {
+            UserDefaults.standard.set(encodedData, forKey: itemsKey)
+        }
     }
 }

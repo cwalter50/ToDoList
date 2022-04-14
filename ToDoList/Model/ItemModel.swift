@@ -8,7 +8,7 @@
 import Foundation
 
 // Immutable Struct. They are all let constants, so that we can only update things in a function like updateCompletion
-struct ItemModel: Identifiable {
+struct ItemModel: Identifiable, Codable {
     let id: String
     let title: String
     let isCompleted: Bool
