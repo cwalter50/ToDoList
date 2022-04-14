@@ -9,16 +9,20 @@ import SwiftUI
 
 struct ListView: View {
     
-    @State var items: [String] = [
-        "This is the first Item",
-        "This is the second Item",
-        "This is the third Item"
-    ]
+    @EnvironmentObject var listViewModel: ListViewModel
+    
     var body: some View {
         List {
-            ForEach(items, id: \.self) { item in
-                ListRowView(title: item)
+            ForEach(listViewModel.items) { item in
+                ListRowView(item: item)
+                    .onTapGesture {
+                        withAnimation(.linear) {
+                            listViewModel.updateItem(item: item)
+                        }
+                    }
             }
+            .onDelete(perform: listViewModel.deleteItem)
+            .onMove(perform: listViewModel.moveItem)
         }
         .listStyle(PlainListStyle())
         .navigationTitle("ToDo List 📝")
@@ -26,14 +30,15 @@ struct ListView: View {
             leading: EditButton(),
             trailing: NavigationLink("Add", destination: AddView())
         )
-        
     }
+    
 }
 
 struct ListView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
             ListView()
+                .environmentObject(ListViewModel())
         }
         
     }
